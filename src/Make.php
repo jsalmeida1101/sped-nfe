@@ -1125,7 +1125,7 @@ class Make
             $this->dom->addChild(
                 $this->dest,
                 "idEstrangeiro",
-                $std->idEstrangeiro,
+                Strings::replaceSpecialsChars(substr(trim($std->idEstrangeiro), 0, 50)),
                 true,
                 $identificador . "Identificação do destinatário no caso de comprador estrangeiro",
                 true
@@ -1561,14 +1561,16 @@ class Make
         $std = $this->equilizeParameters($std, $possible);
 
         //totalizador
-        $this->stdTot->vProd += (float) $std->vProd;
+        if ($std->indTot == 1) {
+            $this->stdTot->vProd += (float) $std->vProd;
+        }
         $this->stdTot->vFrete += (float) $std->vFrete;
         $this->stdTot->vSeg += (float) $std->vSeg;
         $this->stdTot->vDesc += (float) $std->vDesc;
         $this->stdTot->vOutro += (float) $std->vOutro;
-
-        $cean = !empty($std->cEAN) ? $std->cEAN : '';
-        $ceantrib = !empty($std->cEANTrib) ? $std->cEANTrib : '';
+        
+        $cean = !empty($std->cEAN) ? trim(strtoupper($std->cEAN)) : '';
+        $ceantrib = !empty($std->cEANTrib) ? trim(strtoupper($std->cEANTrib)) : '';
         
         $identificador = 'I01 <prod> - ';
         $prod = $this->dom->createElement("prod");

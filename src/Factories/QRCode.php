@@ -23,7 +23,7 @@ class QRCode
 {
     /**
      * putQRTag
-     * Mount URI for QRCode and create XML tag in signed xml
+     * Mount URI for QRCode and create three XML tags in signed xml
      * NOTE: included Manual_de_Especificações_Técnicas_do_DANFE_NFC-e_QR_Code
      *       versão 5.0 since fevereiro de 2018
      * @param DOMDocument $dom NFe
@@ -71,7 +71,6 @@ class QRCode
         $icmsTot = $dom->getElementsByTagName('ICMSTot')->item(0);
         $signedInfo = $dom->getElementsByTagName('SignedInfo')->item(0);
         $chNFe = preg_replace('/[^0-9]/', '', $infNFe->getAttribute("Id"));
-        $cUF = $ide->getElementsByTagName('cUF')->item(0)->nodeValue;
         $tpAmb = $ide->getElementsByTagName('tpAmb')->item(0)->nodeValue;
         $dhEmi = $ide->getElementsByTagName('dhEmi')->item(0)->nodeValue;
         $tpEmis = $ide->getElementsByTagName('tpEmis')->item(0)->nodeValue;
@@ -93,7 +92,7 @@ class QRCode
         $vICMS = $icmsTot->getElementsByTagName('vICMS')->item(0)->nodeValue;
         $digVal = $signedInfo->getElementsByTagName('DigestValue')->item(0)->nodeValue;
         $qrMethod = "get$versao";
-        
+
         $qrcode = self::$qrMethod(
             $chNFe,
             $urlqr,
@@ -108,7 +107,7 @@ class QRCode
             $tpEmis,
             $cDest
         );
-        
+
         $infNFeSupl = $dom->createElement("infNFeSupl");
         $nodeqr = $infNFeSupl->appendChild($dom->createElement('qrCode'));
         $nodeqr->appendChild($dom->createCDATASection($qrcode));
@@ -122,7 +121,7 @@ class QRCode
         $dom->formatOutput = false;
         return $dom->saveXML();
     }
-    
+
     /**
      * Return a QRCode version 1 string to be used in NFCe layout 3.10
      * @param  string $chNFe
@@ -135,7 +134,7 @@ class QRCode
      * @param  string $token
      * @param  string $idToken
      * @param  string $versao
-     * @param  int $tpEmis
+     * @param  string $tpEmis
      * @param  string $cDest
      * @return string
      */
@@ -174,7 +173,7 @@ class QRCode
         }
         return $url.$seq;
     }
-    
+
     /**
      * Return a QRCode version 2 string to be used in NFCe layout 4.00
      * @param  string $chNFe
@@ -187,7 +186,7 @@ class QRCode
      * @param  string $token
      * @param  string $idToken
      * @param  string $versao
-     * @param  int $tpEmis
+     * @param  int    $tpEmis
      * @param  string $cDest
      * @return string
      */
@@ -203,7 +202,7 @@ class QRCode
         $idToken,
         $versao,
         $tpEmis,
-        $cDest = ''
+        $cDest
     ) {
         $ver = $versao/100;
         $cscId = (int) $idToken;
@@ -219,7 +218,7 @@ class QRCode
         $dt = new \DateTime($dhEmi);
         $dia = $dt->format('d');
         $valor = number_format($vNF, 2, '.', '');
-        $digHex = str2Hex($digVal);
+        $digHex = self::str2Hex($digVal);
         $seq = "$chNFe|$ver|$tpAmb|$dia|$valor|$digHex|$cscId";
         $hash = strtoupper(sha1($seq.$csc));
         return "$url$seq|$hash";
